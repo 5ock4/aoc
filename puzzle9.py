@@ -1,6 +1,7 @@
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import field, dataclass
 import re
+from typing import Any, List
 
 
 
@@ -12,12 +13,18 @@ class Knot:
     def __hash__(self):
         return hash(str(self))
 
+    def __mul__(self, num: int) -> List[Any]:
+        list_of_knots = []
+        for _ in range(num):
+            list_of_knots.append(self)
+        return list_of_knots
+
 @dataclass
 class Rope:
     head: Knot = Knot(0, 0)
-    tail: Knot = Knot(0, 0)
     last_instruction: str = ""
     visited_tail_positions = []
+    tail_knots = []
 
     def __post_init__(self):
         self.INSTRUCTIONS_MAPPING = {
@@ -26,7 +33,8 @@ class Rope:
             'L': self._move_left,
             'R': self._move_right,
         }
-        self.visited_tail_positions.append(deepcopy(self.tail))
+        self.tail_knots = Knot(0, 0) * 9
+        self.visited_tail_positions.append(deepcopy(self.tail_knots[8]))
 
     def _knots_close(self):
         if abs(self.head.x - self.tail.x) >= 2:
@@ -72,18 +80,15 @@ class Rope:
 
 
 if __name__ == "__main__":
-    rope = Rope(
-        head=Knot(0,0),
-        tail=Knot(0,0)
-    )
+    rope = Rope()
 
-    with open('puzzle9_input') as input:
-        for line in input:
-            direction = re.search('\w+', line)[0]
-            distance = re.search('\d+', line)[0]
-            rope.move(
-                direction=direction,
-                distance=int(distance)
-            )
-            print(direction, distance, rope.head, rope.tail)
+    # with open('puzzle9_input') as input:
+    #     for line in input:
+    #         direction = re.search('\w+', line)[0]
+    #         distance = re.search('\d+', line)[0]
+    #         rope.move(
+    #             direction=direction,
+    #             distance=int(distance)
+    #         )
+    #         print(direction, distance, rope.head, rope.tail)
     print(len(set(rope.visited_tail_positions)))
